@@ -1,0 +1,54 @@
+site_name: Porasuna
+site_description: Course materials organized by semester and assessment
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  font: false
+  logo: assets/brand-logo.png
+  favicon: assets/brand-logo.png
+  palette:
+    - scheme: default
+      primary: slate
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: slate
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+  - git-revision-date-localized:
+      type: date
+      fallback_to_build_date: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+  - assets/javascripts/lesson-progress.js
+
+extra_css:
+  - assets/stylesheets/porasuna.css
+
+hooks:
+  - hooks.py
