@@ -54,4 +54,13 @@ hide:
   <strong>Start where you are.</strong> Semester 4 is the current workspace. Earlier semesters are ready for notes and resources as you add them.
 </div>
 
+<div class="p-tool-spotlight">
+  <div>
+    <span class="p-eyebrow">STA293 / Probability lab</span>
+    <h2>Flip a coin. Watch the math.</h2>
+    <p>Try the interactive Coin Toss Lab to explore Bernoulli trials, binomial distributions, and live results.</p>
+  </div>
+  <a class="p-button" href="coin-toss/">Open Coin Toss Lab ↗</a>
+</div>
+
 

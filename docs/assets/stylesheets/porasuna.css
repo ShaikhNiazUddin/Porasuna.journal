@@ -305,6 +305,22 @@ body {
 
 .p-callout { padding: 1rem 1.2rem; border: var(--p-border); background: var(--p-yellow); box-shadow: var(--p-shadow); }
 .p-callout p:last-child { margin-bottom: 0; }
+.p-tool-spotlight {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  margin: 2rem 0 .5rem;
+  padding: 1.3rem;
+  border: var(--p-border);
+  background: var(--p-blue);
+  color: var(--p-card-ink);
+  box-shadow: var(--p-shadow);
+}
+.p-tool-spotlight h2 { margin: .8rem 0 .4rem; color: var(--p-card-ink); }
+.p-tool-spotlight p { max-width: 38rem; margin: 0; }
+.p-tool-spotlight .p-button { white-space: nowrap; }
 .p-course-header { padding: 1.4rem; border: var(--p-border); background: var(--p-blue); box-shadow: var(--p-shadow); margin-bottom: 2rem; }
 .p-course-header h1 { margin: .5rem 0; }
 .p-course-header p { margin: 0; }
