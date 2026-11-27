@@ -96,6 +96,15 @@
     .bar-label { height: 22px; font-size: .63rem; font-weight: 700; white-space: nowrap; }
     .frequency .bar-col:nth-child(2) .bar { background: var(--purple); }
     .frequency .bar-label { font-size: .84rem; }
+    .skew-lens { margin-top: 22px; padding-top: 18px; border-top: 4px solid var(--black); }
+    .skew-lens strong { display: block; font-size: .88rem; text-transform: uppercase; }
+    .skew-lens p { margin: 5px 0 12px; font-size: .78rem; font-weight: 600; line-height: 1.45; }
+    .skew-bars { height: 112px; display: flex; align-items: end; gap: 4px; border-bottom: 3px solid var(--black); }
+    .skew-bar { flex: 1; min-width: 0; border: 2px solid var(--black); background: var(--blue); }
+    .skew-bar.right { background: var(--orange); }
+    .skew-bar.peak { background: var(--purple); }
+    .skew-axis { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 7px; font-size: .65rem; font-weight: 800; }
+    .skew-axis strong { color: var(--indigo); font-size: .76rem; text-align: center; }
     .table-wrap { overflow-x: auto; border: 4px solid var(--black); box-shadow: 8px 8px 0 var(--black); }
     table { width: 100%; min-width: 890px; border-collapse: collapse; background: var(--white); text-align: left; }
     th, td { padding: 13px 12px; border: 2px solid var(--black); vertical-align: middle; }
@@ -185,7 +194,7 @@
       </div>
       <div class="card history-card"><h3>Last 30 results</h3><div class="history" id="history"><span class="muted">No flips yet.</span></div></div>
       <div class="charts">
-        <div class="card"><h3>Distribution of Heads counts</h3><p class="chart-note" id="distribution-note">Flip to see the Binomial model.</p><div class="bars" id="distribution" role="img" aria-label="Binomial distribution of Heads counts"></div></div>
+        <div class="card"><h3>Distribution of Heads counts</h3><p class="chart-note" id="distribution-note">Flip to see the Binomial model.</p><div class="bars" id="distribution" role="img" aria-label="Binomial distribution of Heads counts"></div><p class="chart-note" id="actual-skew">Flip to calculate skewness for your experiment.</p><div class="skew-lens"><strong>Skewness lens · 12 flips</strong><p id="skew-note">The same Heads probability with 12 flips makes the tail direction easier to see.</p><div class="skew-bars" id="skew-bars" role="img" aria-label="Binomial shape for 12 flips"></div><div class="skew-axis"><span>0 Heads</span><strong id="skew-direction">Balanced tails</strong><span>12 Heads</span></div></div></div>
         <div class="card"><h3>Heads vs Tails</h3><p class="chart-note">Observed frequency</p><div class="bars frequency" id="frequency" role="img" aria-label="Heads and Tails frequencies"></div></div>
       </div>
     </section>
@@ -252,7 +261,7 @@
     }
     function renderDistribution(s) {
       const el = $("distribution");
-      if (!s.n) { el.innerHTML = ""; $("distribution-note").textContent = "Flip to see the Binomial model."; return; }
+      if (!s.n) { el.innerHTML = ""; $("distribution-note").textContent = "Flip to see the Binomial model."; $("actual-skew").textContent = "Flip to calculate skewness for your experiment."; return; }
       const mean = s.n * s.p, sd = Math.sqrt(s.n * s.p * (1 - s.p));
       const low = Math.max(0, Math.floor(mean - 3 * sd));
       const high = Math.min(s.n, Math.ceil(mean + 3 * sd));
@@ -264,6 +273,23 @@
       el.innerHTML = ks.map((k, i) => `<div class="bar-col"><div class="bar" style="height:${Math.max(3, 174 * values[i] / max).toFixed(1)}px" title="${k} Heads: ${(values[i] * 100).toFixed(2)}%"></div><span class="bar-label">${k}</span></div>`).join("");
       $("distribution-note").textContent = `Binomial(${whole(s.n)}, ${s.p.toFixed(2)}): P(X = k), showing likely counts${width > 16 ? " at selected intervals" : ""}.`;
       el.setAttribute("aria-label", `Binomial distribution for ${s.n} flips and probability ${s.p.toFixed(2)}; peak near ${Math.round(mean)} Heads`);
+      const gamma = s.p > 0 && s.p < 1 ? (1 - 2 * s.p) / sd : NaN;
+      const shape = !Number.isFinite(gamma) ? "undefined at p = 0 or 1" : Math.abs(gamma) < .1 ? "nearly symmetric" : gamma < 0 ? "left-skewed" : "right-skewed";
+      $("actual-skew").textContent = `Skewness of this ${whole(s.n)}-flip distribution: γ₁ = ${Number.isFinite(gamma) ? gamma.toFixed(3) : "—"} (${shape}).`;
+    }
+    function renderSkewLens(p) {
+      const n = 12;
+      const values = Array.from({ length: n + 1 }, (_, k) => binomialProbability(n, p, k));
+      const max = Math.max(...values);
+      const peak = values.indexOf(max);
+      $("skew-bars").innerHTML = values.map((value, k) => `<div class="skew-bar ${k === peak ? "peak" : k > peak ? "right" : ""}" style="height:${Math.max(2, 100 * value / max).toFixed(1)}px" title="${k} Heads: ${(value * 100).toFixed(2)}%"></div>`).join("");
+      const gamma = p > 0 && p < 1 ? (1 - 2 * p) / Math.sqrt(n * p * (1 - p)) : NaN;
+      const direction = p === .5 ? "Balanced tails" : p < .5 ? "Longer right tail →" : "← Longer left tail";
+      $("skew-direction").textContent = Number.isFinite(gamma) ? direction : "One certain outcome";
+      $("skew-note").textContent = Number.isFinite(gamma)
+        ? `Same p = ${p.toFixed(2)}, fixed n = 12. Skewness γ₁ = ${gamma.toFixed(3)}; ${p === .5 ? "symmetric" : p < .5 ? "right-skewed" : "left-skewed"}.`
+        : `At p = ${p.toFixed(2)}, every toss has the same result, so skewness is undefined.`;
+      $("skew-bars").setAttribute("aria-label", `Binomial distribution for 12 flips at p ${p.toFixed(2)}; ${Number.isFinite(gamma) ? direction : "one certain outcome"}`);
     }
     function renderFrequency() {
       const { n, heads } = state, tails = n - heads, max = Math.max(heads, tails, 1);
@@ -401,7 +427,7 @@
       } else runBatch(Number(button.dataset.count));
     }));
     $("custom-count").addEventListener("input", event => event.target.setCustomValidity(""));
-    $("probability").addEventListener("input", () => { render(); setStatus(`Heads probability set to ${pValue().toFixed(2)}.`); });
+    $("probability").addEventListener("input", () => { render(); renderSkewLens(pValue()); setStatus(`Heads probability set to ${pValue().toFixed(2)}.`); });
     $("reset").addEventListener("click", reset);
     $("auto").addEventListener("change", event => {
       if (!event.target.checked) { stopAuto(); setStatus("Auto flip stopped."); return; }
@@ -415,6 +441,7 @@
       state.autoTimer = setInterval(autoFlip, 800);
     });
     render();
+    renderSkewLens(pValue());
   </script>
 </body>
 </html>
